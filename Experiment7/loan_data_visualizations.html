@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Data Visualizations</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <h1>Loan Data Visualizations</h1>
+
+    <script>
+        //Bar Char
+        d3.csv('Loan_Prediction_Problem_Dataset.csv').then(function(data) {
+            const margin = {top: 20, right: 30, bottom: 40, left: 90},
+                width = 600 - margin.left - margin.right,
+                height = 400 - margin.top - margin.bottom;
+
+            const svg = d3.select("body").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            const x = d3.scaleBand()
+                .range([0, width])
+                .padding(0.1)
+                .domain(data.map(d => d.Loan_ID)); // Use Loan_ID as X-axis labels
+
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(data, d => +d.ApplicantIncome)])
+                .range([height, 0]);
+
+            svg.selectAll(".bar")
+                .data(data)
+                .enter().append("rect")
+                .attr("class", "bar")
+                .attr("x", d => x(d.Loan_ID))
+                .attr("y", d => y(d.ApplicantIncome))
+                .attr("width", x.bandwidth())
+                .attr("height", d => height - y(d.ApplicantIncome));
+
+            svg.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x));
+
+            svg.append("g")
+                .call(d3.axisLeft(y));
+        });
+
+
+
+
+        d3.csv('Loan_Prediction_Problem_Dataset.csv').then(function(data) {
+            const width = 450, height = 450, radius = Math.min(width, height) / 2;
+
+            const svg = d3.select("body").append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .append("g")
+                .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+            const educationCounts = d3.rollup(data, v => v.length, d => d.Education);
+            const pie = d3.pie().value(d => d[1])(Array.from(educationCounts));
+            const arc = d3.arc().innerRadius(0).outerRadius(radius);
+
+            svg.selectAll("path")
+                .data(pie)
+                .enter().append("path")
+                .attr("d", arc)
+                .attr("fill", (d, i) => d3.schemeSet2[i]);
+
+            svg.selectAll("text")
+                .data(pie)
+                .enter().append("text")
+                .attr("transform", d => `translate(${arc.centroid(d)})`)
+                .text(d => d.data[0]);
+        });
+
+
+
+        d3.csv('Loan_Prediction_Problem_Dataset.csv').then(function(data) {
+        const margin = {top: 20, right: 30, bottom: 40, left: 90},
+            width = 600 - margin.left - margin.right,
+            height = 400 - margin.top - margin.bottom;
+
+        const svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        const x = d3.scaleLinear()
+            .domain([0, d3.max(data, d => +d.LoanAmount)])
+            .range([0, width]);
+
+        const histogram = d3.histogram()
+            .value(d => +d.LoanAmount)
+            .domain(x.domain())
+            .thresholds(x.ticks(40));
+
+        const bins = histogram(data);
+
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(bins, d => d.length)])
+            .range([height, 0]);
+
+        svg.selectAll("rect")
+            .data(bins)
+            .enter().append("rect")
+            .attr("x", d => x(d.x0))
+            .attr("y", d => y(d.length))
+            .attr("width", d => x(d.x1) - x(d.x0) - 1)
+            .attr("height", d => height - y(d.length))
+            .style("fill", "#69b3a2");
+
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x));
+
+        svg.append("g")
+            .call(d3.axisLeft(y));
+    });
+    
+
+    d3.csv('Loan_Prediction_Problem_Dataset.csv').then(function(data) {
+        const margin = {top: 20, right: 30, bottom: 40, left: 90},
+            width = 600 - margin.left - margin.right,
+            height = 400 - margin.top - margin.bottom;
+
+        const svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        const x = d3.scaleLinear()
+            .domain([0, d3.max(data, d => +d.Loan_Amount_Term)])
+            .range([0, width]);
+
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(data, d => +d.LoanAmount)])
+            .range([height, 0]);
+
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x));
+
+        svg.append("g")
+            .call(d3.axisLeft(y));
+
+        svg.selectAll("circle")
+            .data(data)
+            .enter().append("circle")
+            .attr("cx", d => x(d.Loan_Amount_Term))
+            .attr("cy", d => y(d.LoanAmount))
+            .attr("r", 5)
+            .style("fill", "#69b3a2");
+    });
+
+
+
+    d3.csv('Loan_Prediction_Problem_Dataset.csv').then(function(data) {
+        const margin = {top: 20, right: 30, bottom: 40, left: 90},
+            width = 600 - margin.left - margin.right,
+            height = 400 - margin.top - margin.bottom;
+
+        const svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        const x = d3.scaleLinear()
+            .domain([0, d3.max(data, d => +d.ApplicantIncome)])
+            .range([0, width]);
+
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(data, d => +d.LoanAmount)])
+            .range([height, 0]);
+
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x));
+
+        svg.append("g")
+            .call(d3.axisLeft(y));
+
+        svg.selectAll("circle")
+            .data(data)
+            .enter().append("circle")
+            .attr("cx", d => x(d.ApplicantIncome))
+            .attr("cy", d => y(d.LoanAmount))
+            .attr("r", 5)
+            .style("fill", "#69b3a2");
+    });
+
+
+    d3.csv('Loan_Prediction_Problem_Dataset.csv').then(function(data) {
+        const margin = {top: 20, right: 30, bottom: 40, left: 90},
+            width = 600 - margin.left - margin.right,
+            height = 400 - margin.top - margin.bottom;
+
+        const svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        const x = d3.scaleLinear()
+            .domain([0, d3.max(data, d => +d.ApplicantIncome)])
+            .range([0, width]);
+
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(data, d => +d.LoanAmount)])
+            .range([height, 0]);
+
+        const z = d3.scaleLinear()
+            .domain([0, d3.max(data, d => +d.CoapplicantIncome)])
+            .range([1, 40]);
+
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x));
+
+        svg.append("g")
+            .call(d3.axisLeft(y));
+
+        svg.selectAll("circle")
+            .data(data)
+            .enter().append("circle")
+            .attr("cx", d => x(d.ApplicantIncome))
+            .attr("cy", d => y(d.LoanAmount))
+            .attr("r", d => z(d.CoapplicantIncome))
+            .style("fill", "#69b3a2")
+            .style("opacity", "0.7");
+    });
+
+
+    d3.csv('Loan_Prediction_Problem_Dataset.csv').then(function(data) {
+        const margin = {top: 20, right: 20, bottom: 30, left: 40},
+            width = 600 - margin.left - margin.right,
+            height = 400 - margin.top - margin.bottom;
+
+        const svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        const x = d3.scaleLinear()
+            .domain([0, d3.max(data, d => +d.ApplicantIncome)])
+            .range([0, width]);
+
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(data, d => +d.LoanAmount)])
+            .range([height, 0]);
+
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x));
+
+        svg.append("g")
+            .call(d3.axisLeft(y));
+
+        const line = d3.line()
+            .x(d => x(d.ApplicantIncome))
+            .y(d => y(d.LoanAmount));
+
+        svg.append("path")
+            .datum(data)
+            .attr("fill", "none")
+            .attr("stroke", "steelblue")
+            .attr("stroke-width", 1.5)
+            .attr("d", line);
+    });
+
+
+    d3.csv('Loan_Prediction_Problem_Dataset.csv').then(function(data) {
+    // Convert LoanAmount to numeric
+        data.forEach(d => d.LoanAmount = +d.LoanAmount);
+
+        const margin = {top: 20, right: 20, bottom: 30, left: 40},
+            width = 600 - margin.left - margin.right,
+            height = 400 - margin.top - margin.bottom;
+
+        const svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        const q1 = d3.quantile(data.map(d => d.LoanAmount).sort(d3.ascending), 0.25);
+        const median = d3.quantile(data.map(d => d.LoanAmount).sort(d3.ascending), 0.5);
+        const q3 = d3.quantile(data.map(d => d.LoanAmount).sort(d3.ascending), 0.75);
+        const interQuantileRange = q3 - q1;
+        const min = q1 - 1.5 * interQuantileRange;
+        const max = q3 + 1.5 * interQuantileRange;
+
+        const y = d3.scaleLinear()
+            .domain([min, max])
+            .range([height, 0]);
+
+        svg.append("g")
+            .call(d3.axisLeft(y));
+
+        // Box
+        svg.append("rect")
+            .attr("x", width / 2 - 50)
+            .attr("y", y(q3))
+            .attr("height", y(q1) - y(q3))
+            .attr("width", 100)
+            .attr("stroke", "black")
+            .style("fill", "#69b3a2");
+
+        // Median line
+        svg.append("line")
+            .attr("x1", width / 2 - 50)
+            .attr("x2", width / 2 + 50)
+            .attr("y1", y(median))
+            .attr("y2", y(median))
+            .attr("stroke", "black");
+    });
+
+
+    d3.csv('Loan_Prediction_Problem_Dataset.csv').then(function(data) {
+        const educationCounts = d3.rollup(data, v => v.length, d => d.Education);
+        const margin = {top: 20, right: 20, bottom: 30, left: 40},
+            width = 600 - margin.left - margin.right,
+            height = 400 - margin.top - margin.bottom;
+
+        const svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        const x = d3.scaleBand()
+            .range([0, width])
+            .domain(Array.from(educationCounts.keys()))
+            .padding(0.1);
+
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(Array.from(educationCounts.values()))])
+            .range([height, 0]);
+
+        svg.selectAll(".bar")
+            .data(Array.from(educationCounts))
+            .enter().append("rect")
+            .attr("class", "bar")
+            .attr("x", d => x(d[0]))
+            .attr("y", d => y(d[1]))
+            .attr("width", x.bandwidth())
+            .attr("height", d => height - y(d[1]));
+
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x));
+
+        svg.append("g")
+            .call(d3.axisLeft(y));
+    });
+
+
+    </script>
+</body>
+</html>
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Data Visualizations</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <h1>Loan Data Visualizations</h1>
+
+    <script>
+        // Bar Chart - Applicant Income by Loan ID
+        d3.csv('Loan_Prediction_Problem_Dataset.csv').then(function(data) {
+            const margin = {top: 20, right: 30, bottom: 60, left: 90},
+                width = 600 - margin.left - margin.right,
+                height = 400 - margin.top - margin.bottom;
+
+            const svg = d3.select("body").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            const x = d3.scaleBand()
+                .range([0, width])
+                .padding(0.1)
+                .domain(data.map(d => d.Loan_ID)); // Use Loan_ID as X-axis labels
+
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(data, d => +d.ApplicantIncome)])
+                .range([height, 0]);
+
+            svg.selectAll(".bar")
+                .data(data)
+                .enter().append("rect")
+                .attr("class", "bar")
+                .attr("x", d => x(d.Loan_ID))
+                .attr("y", d => y(d.ApplicantIncome))
+                .attr("width", x.bandwidth())
+                .attr("height", d => height - y(d.ApplicantIncome));
+
+            svg.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x))
+                .selectAll("text")
+                .attr("transform", "rotate(-45)")
+                .style("text-anchor", "end");
+
+            svg.append("g")
+                .call(d3.axisLeft(y));
+
+            // Adding X and Y Axis labels
+            svg.append("text")
+                .attr("x", width / 2)
+                .attr("y", height + margin.bottom - 15)
+                .attr("text-anchor", "middle")
+                .text("Loan ID");
+
+            svg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 0 - margin.left + 15)
+                .attr("x", 0 - height / 2)
+                .attr("dy", "1em")
+                .attr("text-anchor", "middle")
+                .text("Applicant Income");
+        });
+
+        // Pie Chart - Education Distribution
+        d3.csv('Loan_Prediction_Problem_Dataset.csv').then(function(data) {
+            const width = 450, height = 450, radius = Math.min(width, height) / 2;
+
+            const svg = d3.select("body").append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .append("g")
+                .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+            const educationCounts = d3.rollup(data, v => v.length, d => d.Education);
+            const pie = d3.pie().value(d => d[1])(Array.from(educationCounts));
+            const arc = d3.arc().innerRadius(0).outerRadius(radius);
+
+            svg.selectAll("path")
+                .data(pie)
+                .enter().append("path")
+                .attr("d", arc)
+                .attr("fill", (d, i) => d3.schemeSet2[i]);
+
+            svg.selectAll("text")
+                .data(pie)
+                .enter().append("text")
+                .attr("transform", d => `translate(${arc.centroid(d)})`)
+                .text(d => d.data[0]);
+
+            // Adding Chart Title
+            svg.append("text")
+                .attr("x", 0)
+                .attr("y", -height / 2 + 20)
+                .attr("text-anchor", "middle")
+                .style("font-size", "16px")
+                .text("Distribution of Education");
+        });
+
+        // Histogram - Loan Amount Distribution
+        d3.csv('Loan_Prediction_Problem_Dataset.csv').then(function(data) {
+            const margin = {top: 20, right: 30, bottom: 60, left: 90},
+                width = 600 - margin.left - margin.right,
+                height = 400 - margin.top - margin.bottom;
+
+            const svg = d3.select("body").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            const x = d3.scaleLinear()
+                .domain([0, d3.max(data, d => +d.LoanAmount)])
+                .range([0, width]);
+
+            const histogram = d3.histogram()
+                .value(d => +d.LoanAmount)
+                .domain(x.domain())
+                .thresholds(x.ticks(40));
+
+            const bins = histogram(data);
+
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(bins, d => d.length)])
+                .range([height, 0]);
+
+            svg.selectAll("rect")
+                .data(bins)
+                .enter().append("rect")
+                .attr("x", d => x(d.x0))
+                .attr("y", d => y(d.length))
+                .attr("width", d => x(d.x1) - x(d.x0) - 1)
+                .attr("height", d => height - y(d.length))
+                .style("fill", "#69b3a2");
+
+            svg.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x));
+
+            svg.append("g")
+                .call(d3.axisLeft(y));
+
+            // Adding X and Y Axis labels
+            svg.append("text")
+                .attr("x", width / 2)
+                .attr("y", height + margin.bottom - 15)
+                .attr("text-anchor", "middle")
+                .text("Loan Amount");
+
+            svg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 0 - margin.left + 15)
+                .attr("x", 0 - height / 2)
+                .attr("dy", "1em")
+                .attr("text-anchor", "middle")
+                .text("Frequency");
+        });
+
+        // Scatter Plot - Loan Amount vs Loan Term
+        d3.csv('Loan_Prediction_Problem_Dataset.csv').then(function(data) {
+            const margin = {top: 20, right: 30, bottom: 60, left: 90},
+                width = 600 - margin.left - margin.right,
+                height = 400 - margin.top - margin.bottom;
+
+            const svg = d3.select("body").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            const x = d3.scaleLinear()
+                .domain([0, d3.max(data, d => +d.Loan_Amount_Term)])
+                .range([0, width]);
+
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(data, d => +d.LoanAmount)])
+                .range([height, 0]);
+
+            svg.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x));
+
+            svg.append("g")
+                .call(d3.axisLeft(y));
+
+            svg.selectAll("circle")
+                .data(data)
+                .enter().append("circle")
+                .attr("cx", d => x(d.Loan_Amount_Term))
+                .attr("cy", d => y(d.LoanAmount))
+                .attr("r", 5)
+                .style("fill", "#69b3a2");
+
+            // Adding X and Y Axis labels
+            svg.append("text")
+                .attr("x", width / 2)
+                .attr("y", height + margin.bottom - 15)
+                .attr("text-anchor", "middle")
+                .text("Loan Amount Term");
+
+            svg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 0 - margin.left + 15)
+                .attr("x", 0 - height / 2)
+                .attr("dy", "1em")
+                .attr("text-anchor", "middle")
+                .text("Loan Amount");
+        });
+
+        // Scatter Plot - Applicant Income vs Loan Amount
+        d3.csv('Loan_Prediction_Problem_Dataset.csv').then(function(data) {
+            const margin = {top: 20, right: 30, bottom: 60, left: 90},
+                width = 600 - margin.left - margin.right,
+                height = 400 - margin.top - margin.bottom;
+
+            const svg = d3.select("body").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            const x = d3.scaleLinear()
+                .domain([0, d3.max(data, d => +d.ApplicantIncome)])
+                .range([0, width]);
+
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(data, d => +d.LoanAmount)])
+                .range([height, 0]);
+
+            svg.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x));
+
+            svg.append("g")
+                .call(d3.axisLeft(y));
+
+            svg.selectAll("circle")
+                .data(data)
+                .enter().append("circle")
+                .attr("cx", d => x(d.ApplicantIncome))
+                .attr("cy", d => y(d.LoanAmount))
+                .attr("r", 5)
+                .style("fill", "#69b3a2");
+
+            // Adding X and Y Axis labels
+            svg.append("text")
+                .attr("x", width / 2)
+                .attr("y", height + margin.bottom - 15)
+                .attr("text-anchor", "middle")
+                .text("Applicant Income");
+
+            svg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 0 - margin.left + 15)
+                .attr("x", 0 - height / 2)
+                .attr("dy", "1em")
+                .attr("text-anchor", "middle")
+                .text("Loan Amount");
+        });
+
+
+
+        d3.csv('Loan_Prediction_Problem_Dataset.csv').then(function(data) {
+            const margin = {top: 20, right: 30, bottom: 60, left: 90},
+                width = 600 - margin.left - margin.right,
+                height = 400 - margin.top - margin.bottom;
+
+            const svg = d3.select("body").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            // Scales
+            const x = d3.scaleLinear()
+                .domain([0, d3.max(data, d => +d.ApplicantIncome)])
+                .range([0, width]);
+
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(data, d => +d.LoanAmount)])
+                .range([height, 0]);
+
+            // X-axis
+            svg.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x));
+
+            // Y-axis
+            svg.append("g")
+                .call(d3.axisLeft(y));
+
+            // Jitter effect with circles
+            svg.selectAll("circle")
+                .data(data)
+                .enter().append("circle")
+                .attr("cx", d => x(+d.ApplicantIncome + (Math.random() - 0.5) * 2000)) // Jitter effect
+                .attr("cy", d => y(+d.LoanAmount + (Math.random() - 0.5) * 2000)) // Adding jitter to y-axis too
+                .attr("r", 5)
+                .style("fill", "#69b3a2")
+                .style("opacity", "0.7");
+
+            // Adding X and Y Axis labels
+            svg.append("text")
+                .attr("x", width / 2)
+                .attr("y", height + margin.bottom - 15)
+                .attr("text-anchor", "middle")
+                .text("Applicant Income");
+
+            svg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 0 - margin.left + 15)
+                .attr("x", 0 - height / 2)
+                .attr("dy", "1em")
+                .attr("text-anchor", "middle")
+                .text("Loan Amount");
+        });
+
+
+
+
+
+        // Helper function to compute Kernel Density Estimation (KDE)
+function kernelDensityEstimator(kernel, X) {
+    return function(V) {
+        return X.map(function(x) {
+            return [x, d3.mean(V, function(v) { return kernel(x - v); })];
+        });
+    };
+}
+
+function kernelEpanechnikov(k) {
+    return function(v) {
+        return Math.abs(v /= k) <= 1 ? 0.75 * (1 - v * v) / k : 0;
+    };
+}
+
+        d3.csv('Loan_Prediction_Problem_Dataset.csv').then(function(data) {
+            const margin = {top: 20, right: 30, bottom: 60, left: 90},
+                width = 600 - margin.left - margin.right,
+                height = 400 - margin.top - margin.bottom;
+
+            const svg = d3.select("body").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            // X-axis scale for ApplicantIncome
+            const x = d3.scaleLinear()
+                .domain([0, d3.max(data, d => +d.ApplicantIncome)])
+                .range([0, width]);
+
+            // Y-axis scale for LoanAmount
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(data, d => +d.LoanAmount)])
+                .range([height, 0]);
+
+            // X-axis
+            svg.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x));
+
+            // Y-axis
+            svg.append("g")
+                .call(d3.axisLeft(y));
+
+            // Prepare data: filter numeric values
+            const applicantIncome = data.map(d => +d.ApplicantIncome);
+
+            // KDE for ApplicantIncome
+            const kde = kernelDensityEstimator(kernelEpanechnikov(2000), x.ticks(40));
+            const density = kde(applicantIncome);
+
+            // Create a scale for the density
+            const yDensity = d3.scaleLinear()
+                .range([height, 0])
+                .domain([0, d3.max(density, d => d[1])]);
+
+            // Draw the violin plot shape
+            svg.append("path")
+                .datum(density)
+                .attr("fill", "#69b3a2")
+                .attr("stroke", "#000")
+                .attr("stroke-width", 1)
+                .attr("opacity", 0.8)
+                .attr("d", d3.line()
+                    .curve(d3.curveBasis) // Smooth curve
+                    .x(d => x(d[0]))
+                    .y(d => yDensity(d[1]))
+                );
+
+            // Adding X and Y Axis labels
+            svg.append("text")
+                .attr("x", width / 2)
+                .attr("y", height + margin.bottom - 15)
+                .attr("text-anchor", "middle")
+                .text("Applicant Income");
+
+            svg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 0 - margin.left + 15)
+                .attr("x", 0 - height / 2)
+                .attr("dy", "1em")
+                .attr("text-anchor", "middle")
+                .text("Density");
+        });
+
+
+        
+    </script>
+</body>
+</html> -->
